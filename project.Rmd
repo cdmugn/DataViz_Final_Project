@@ -1,0 +1,21 @@
+---
+title: "project"
+author: "Clara Mugnai"
+date: "3/21/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Making a shiny app - working with data from a git hub repositorydata set, converted to a csv for me to use
+
+```{r}
+library(tidyverse)
+library (readr)
+
+beer_df <- read_csv("data/beer.csv")
+
+```
+
