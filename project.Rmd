@@ -1,7 +1,7 @@
 ---
-title: "project"
+title: "Beers and Breweries"
 author: "Clara Mugnai"
-date: "3/21/2022"
+date: "3/23/2022"
 output: html_document
 ---
 
@@ -15,6 +15,8 @@ Making a shiny app - working with data from a git hub repositorydata set, conver
 library(tidyverse)
 library (readr)
 library(maps)
+library(leaflet)
+library(ggplot2)
 
 cities_df <- read_csv("data/uscities.csv")
 beer_df <- read_csv("data/beer.csv")
@@ -23,8 +25,8 @@ state_df <- ggplot2::map_data("state")
 beer_city <- left_join(beer_df, cities_df, by = c("City" = "city")) %>% filter(State == state_id) %>% select(1:11, 17:19)
 
 content <- beer_city %>%
-  mutate(popup = paste0('<a href =', beer_city$Name.x, '>',
-                        beer_city$Style, '</a>'))
+  mutate(popup = paste0( beer_city$Name.x,"/",
+                        beer_city$Style))
 
 
 beer_map2 <- leaflet(beer_city) %>%
@@ -38,6 +40,7 @@ beer_map2
 ```
 
 Above, I organize the data to have lat and long and use leaflet to make a popup map so you can see the predominant type in each City.
+
 - In the app I want a table to pop up where you can pick a city and see type listed as well, to make it clearer. 
 
 ```{r}
@@ -58,13 +61,13 @@ server <- function(input, output, session) {
    
   output$leafplot <- renderLeaflet({
     leaflet(beer_city) %>%
-  setView(lng = -98.583, lat = 39.833, zoom = 4) %>% 
+  setView(lng = -98.583, lat = 39.833, zoom = 2) %>% 
   addTiles() %>% 
   addProviderTiles(providers$Wikimedia) %>% 
   addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(), popup = content$popup)
   })
-  output$citybeer <- renderTable({ onecity_df()
-    })
+  output$citybeer <- renderTable({ 
+    onecity_df()}, title = "citychoice")
 }
 
 shinyApp(ui, server)
@@ -73,3 +76,64 @@ shinyApp(ui, server)
 - Made base shiny app with the front tab as a leaflet with all of the beers and then a table underneath that the person can change for each city. Need to add tabs with styles and plots of the styles.
 
 - Have tabs for both style and brewery - investigate a way to connect the app so you can click on a style or a brewery and be redirected to that tab?
+
+
+Making static plots by style: 
+want data set that has mean ABV for each type so that lollipop plot can be made where you pick a style or multiple styles and it shows mean ABV as well as the ABV for each one.
+```{r}
+style_df <- beer_city %>% group_by(Style) %>%
+  summarise(meanABV = mean(ABV, na.rm = TRUE)) %>% 
+  ungroup() %>%
+  mutate(Style = fct_reorder(Style, meanABV))
+
+ggplot(data = beer_city, aes(x = Style, y = ABV)) +
+  geom_point(data = style_df, aes(y = meanABV), color = "Blue", size =2) + 
+  geom_point(color = "Red", size = .5) + 
+  geom_segment((aes(x=Style, xend=Style, y=0, yend=ABV))) + coord_flip() + labs(x = "Beer Style", y = "ABV content")
+```
+
+Want to put this plot into a new tab on the shiny app. Have to figure out how to make a new tab and then put this onto it. -Got the input, need to put in reactive data set.
+
+```{r}
+library(shiny)
+ui <- fluidPage(
+  titlePanel("Breweries and Beers in U.S.A."),
+  tabsetPanel(tabPanel("Beer Map", 
+    sidebarLayout(sidebarPanel(
+    selectizeInput("citychoice",
+                   label = "Choose a City", choices = levels(factor(beer_city$City)),
+                   selected = "Austin"), width = 2),
+    mainPanel(leafletOutput("leafplot"),
+              tableOutput("citybeer")),
+   )
+  ),
+ tabPanel("Styles",
+          sidebarLayout(sidebarPanel(
+            selectizeInput("stylechoice",
+                           label = "Choose a Style", choice = levels(factor(beer_city$City)),
+                           selected = "Belgian IPA", multiple = TRUE), width = 2),
+            mainPanel(plotOutput("lollipop1")),
+      ))
+  ))
+server <- function(input, output, session) {
+  
+   onecity_df <- reactive({beer_city %>% filter(City == input$citychoice) %>% select(3,7,9) %>% rename("Beer name" = "Name.x", "Brewery" = "Name.y")
+   })
+   
+  output$leafplot <- renderLeaflet({
+    leaflet(beer_city) %>%
+  setView(lng = -98.583, lat = 39.833, zoom = 2) %>% 
+  addTiles() %>% 
+  addProviderTiles(providers$Wikimedia) %>% 
+  addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(), popup = content$popup)
+  })
+  output$citybeer <- renderTable({ 
+    onecity_df()
+    })
+}
+
+shinyApp(ui, server)
+```
+
+look into zooming based on the city you choose
+add city title to bottom table
