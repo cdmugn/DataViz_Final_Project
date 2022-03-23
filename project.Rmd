@@ -14,8 +14,62 @@ Making a shiny app - working with data from a git hub repositorydata set, conver
 ```{r}
 library(tidyverse)
 library (readr)
+library(maps)
 
+cities_df <- read_csv("data/uscities.csv")
 beer_df <- read_csv("data/beer.csv")
+state_df <- ggplot2::map_data("state")
+
+beer_city <- left_join(beer_df, cities_df, by = c("City" = "city")) %>% filter(State == state_id) %>% select(1:11, 17:19)
+
+content <- beer_city %>%
+  mutate(popup = paste0('<a href =', beer_city$Name.x, '>',
+                        beer_city$Style, '</a>'))
+
+
+beer_map2 <- leaflet(beer_city) %>%
+  setView(lng = -98.583, lat = 39.833, zoom = 4) %>% 
+  addTiles() %>% 
+  addProviderTiles(providers$Wikimedia) %>% 
+  addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(), popup = content$popup)
+
+beer_map2
 
 ```
 
+Above, I organize the data to have lat and long and use leaflet to make a popup map so you can see the predominant type in each City.
+- In the app I want a table to pop up where you can pick a city and see type listed as well, to make it clearer. 
+
+```{r}
+library(shiny)
+ui <- fluidPage(
+  sidebarLayout(sidebarPanel(
+    selectizeInput("citychoice",
+                   label = "Choose a City", choices = levels(factor(beer_city$City)),
+                   selected = "Lincoln"), width = 2),
+    mainPanel(leafletOutput("leafplot"),
+              tableOutput("citybeer")),
+  )
+)
+server <- function(input, output, session) {
+  
+   onecity_df <- reactive({beer_city %>% filter(City == input$citychoice) %>% select(3,7,9) %>% rename("Beer name" = "Name.x", "Brewery" = "Name.y")
+   })
+   
+  output$leafplot <- renderLeaflet({
+    leaflet(beer_city) %>%
+  setView(lng = -98.583, lat = 39.833, zoom = 4) %>% 
+  addTiles() %>% 
+  addProviderTiles(providers$Wikimedia) %>% 
+  addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(), popup = content$popup)
+  })
+  output$citybeer <- renderTable({ onecity_df()
+    })
+}
+
+shinyApp(ui, server)
+```
+
+- Made base shiny app with the front tab as a leaflet with all of the beers and then a table underneath that the person can change for each city. Need to add tabs with styles and plots of the styles.
+
+- Have tabs for both style and brewery - investigate a way to connect the app so you can click on a style or a brewery and be redirected to that tab?
