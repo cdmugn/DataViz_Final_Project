@@ -13,3 +13,7 @@ Added a new tab and a title to my shiny app and made a stagnant lollipop plot th
 3/28: beginning of class
 
 Added another lollipop plot for IBU by style and put my ABV lollipop plot into shiny. Worked on the issues of a reactive title for my table and zooming in on the plot when the city is selected, but did not find solutions. For today, I want to make conditional axis labels so the user can pick the response variable for the lollipop plots.
+
+3/28: after-class
+
+Added the title above the table that changes with the city choice. Realized it may serve me to leave both lollipop plots or I could make them one where user changes the x, I have not decided. The next step is for me to solve the zooming with input problem. I think that needs to be solved.

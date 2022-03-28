@@ -6,3 +6,7 @@
 3/23: Jack Sylvia
 
 - Doing baseball stats for different teams and fields in St. Lawrence League, wants to make shiny app with the field shapes as visuals and the team stats as the numbers. Recommended I title my table and that I have the cities you choose communicate with the leaflet map.
+
+3/28: James Wolpe
+
+- Cleaning tennis data and narrowing down number of entries so it is easier to tidy. Final product showing success of tennis players if they follow the pattern of "expected returns" vs. if they don't and how the success has changed over time.

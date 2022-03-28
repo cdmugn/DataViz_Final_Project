@@ -43,36 +43,6 @@ Above, I organize the data to have lat and long and use leaflet to make a popup 
 
 - In the app I want a table to pop up where you can pick a city and see type listed as well, to make it clearer. 
 
-```{r}
-library(shiny)
-ui <- fluidPage(
-  sidebarLayout(sidebarPanel(
-    selectizeInput("citychoice",
-                   label = "Choose a City", choices = levels(factor(beer_city$City)),
-                   selected = "Lincoln"), width = 2),
-    mainPanel(leafletOutput("leafplot"),
-              tableOutput("citybeer")),
-  )
-)
-server <- function(input, output, session) {
-  
-   onecity_df <- reactive({beer_city %>% filter(City == input$citychoice) %>% select(3,7,9) %>% rename("Beer name" = "Name.x", "Brewery" = "Name.y")
-   })
-   
-  output$leafplot <- renderLeaflet({
-    leaflet(beer_city) %>%
-  setView(lng = -98.583, lat = 39.833, zoom = 2) %>% 
-  addTiles() %>% 
-  addProviderTiles(providers$Wikimedia) %>% 
-  addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(), popup = content$popup)
-  })
-  output$citybeer <- renderTable({ 
-    onecity_df()}, title = "citychoice")
-}
-
-shinyApp(ui, server)
-```
-
 - Made base shiny app with the front tab as a leaflet with all of the beers and then a table underneath that the person can change for each city. Need to add tabs with styles and plots of the styles.
 
 - Have tabs for both style and brewery - investigate a way to connect the app so you can click on a style or a brewery and be redirected to that tab?
@@ -94,100 +64,18 @@ ggplot(data = beer_city, aes(x = Style, y = ABV)) +
 
 Want to put this plot into a new tab on the shiny app. Have to figure out how to make a new tab and then put this onto it. -Got the input, need to put in reactive data set.
 
-```{r}
-library(shiny)
-ui <- fluidPage(
-  titlePanel("Breweries and Beers in U.S.A."),
-  tabsetPanel(tabPanel("Beer Map", 
-    sidebarLayout(sidebarPanel(
-    selectizeInput("citychoice",
-                   label = "Choose a City", choices = levels(factor(beer_city$City)),
-                   selected = "Austin"), width = 2),
-    mainPanel(leafletOutput("leafplot"),
-              tableOutput("citybeer")),
-   )
-  ),
- tabPanel("Styles",
-          sidebarLayout(sidebarPanel(
-            selectizeInput("stylechoice",
-                           label = "Choose a Style", choice = levels(factor(beer_city$Style)),
-                           selected = "Belgian IPA", multiple = TRUE), width = 2),
-            mainPanel(plotOutput("lollipop1")),
-      ))
-  ))
-server <- function(input, output, session) {
-  
-   onecity_df <- reactive({beer_city %>% filter(City == input$citychoice) %>% select(3,7,9) %>% rename("Beer name" = "Name.x", "Brewery" = "Name.y")
-   })
-   
-  output$leafplot <- renderLeaflet({
-    leaflet(beer_city) %>%
-  setView(lng = -98.583, lat = 39.833, zoom = 2) %>% 
-  addTiles() %>% 
-  addProviderTiles(providers$Wikimedia) %>% 
-  addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(), popup = content$popup)
-  })
-  output$citybeer <- renderTable({ 
-    onecity_df()
-    })
-}
-
-shinyApp(ui, server)
-```
-
 - look into zooming based on the city you choose - problem! I have ideas to fix this but it is taking forever, something to do with leafletProxy and observe
-- add city title to bottom table - this is way more annoying than it should be so I moved on, will figure it out soon.
 
-
-```{r}
-library(shiny)
-ui <- fluidPage(
-  titlePanel("Breweries and Beers in U.S.A."),
-  tabsetPanel(tabPanel("Beer Map", 
-    sidebarLayout(sidebarPanel(
-    selectizeInput("citychoice",
-                   label = "Choose a City", choices = levels(factor(beer_city$City)),
-                   selected = "Austin"), width = 2),
-    mainPanel(leafletOutput("leafplot"),
-              tableOutput("citybeer")),
-   )
-  ),
- tabPanel("Styles",
-          sidebarLayout(sidebarPanel(
-            selectizeInput("stylechoice",
-                           label = "Choose a Style", choice = levels(factor(beer_city$Style)),
-                           selected = "Belgian IPA", multiple = TRUE), width = 2),
-            mainPanel(plotOutput("lollipop1")),
-      ))
-  ))
-server <- function(input, output, session) {
-  
-   onecity_df <- reactive({beer_city %>% filter(City == input$citychoice) %>% rename("Beer name" = "Name.x", "Brewery" = "Name.y")
-   })
-   
-  output$leafplot <- renderLeaflet({
-    leaflet(beer_city) %>%
-  setView(lng = -98.583, lat = 39.833, zoom = 2) %>% 
-  addTiles() %>% 
-  addProviderTiles(providers$Wikimedia) %>% 
-  addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(), popup = content$popup)
-  })
-    observe({
-leafletProxy(mapId = "leafplot", data = onecity_df()) %>% clearMarkers() 
-  })
-    
-  output$citybeer <- renderTable({ 
-    onecity_df() %>% select(3,7,9)
-    })
-}
-
-shinyApp(ui, server)
-```
 
 -Now I will put in reactive lollipop plot because I know how to do that.
 
 - also going to add a lollipop plot that compares IBU values across styles
 
+- this runs so I will change the input of the x so the user can choose either IBU or ABV and they are on the same plot, with the axis label changing conditionally. Next time I work on this. 
+
+
+
+- Adding table title with rendertext so it changes with the one city date frame change.
 ```{r}
 library(shiny)
 ui <- fluidPage(
@@ -198,6 +86,7 @@ ui <- fluidPage(
                    label = "Choose a City", choices = levels(factor(beer_city$City)),
                    selected = "Austin"), width = 2),
     mainPanel(leafletOutput("leafplot"),
+              span(textOutput("tabletitle"), style = "font-size:150%"),
               tableOutput("citybeer")),
    )
   ),
@@ -235,6 +124,10 @@ server <- function(input, output, session) {
   addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(), popup = content$popup)
   })
   
+  output$tabletitle <- renderText({
+    (input$citychoice)
+  })
+  
   output$citybeer <- renderTable({ 
     onecity_df()
     })
@@ -256,4 +149,92 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-- this runs so I will change the input of the x so the user can choose either IBU or ABV and they are on the same plot, with the axis label changing confitionally. Next time I work on this. 
+- now have title above the table
+
+Tasks:
+
+- Zooming based on the city you choose - problem! I have ideas to fix this but it is taking forever, something to do with leafletProxy and observe
+
+- Change the input of the x so the user can choose either IBU or ABV and they are on the same plot, with the axis label changing conditionally? Could be good to keep both or could be better to have the user choose one
+
+- Add titles for the plots
+
+- Add a tab where user can choose a brewery
+```{r}
+library(shiny)
+ui <- fluidPage(
+  titlePanel("Breweries and Beers in U.S.A."),
+  tabsetPanel(tabPanel("Beer Map", 
+    sidebarLayout(sidebarPanel(
+    selectizeInput("citychoice",
+                   label = "Choose a City", choices = levels(factor(beer_city$City)),
+                   selected = "Austin"), width = 2),
+    mainPanel(leafletOutput("leafplot"),
+              span(textOutput("tabletitle"), style = "font-size:150%"),
+              tableOutput("citybeer")),
+   )
+  ),
+ tabPanel("Styles",
+          sidebarLayout(sidebarPanel(
+            selectizeInput("stylechoice",
+                           label = "Choose a Style", choice = levels(factor(beer_city$Style)),
+                           selected = "Belgian IPA", multiple = TRUE), width = 2),
+            mainPanel(plotOutput("lollipop1"),
+                      plotOutput("lollipop2")),
+      ))
+  ))
+server <- function(input, output, session) {
+  
+   onecity_df <- reactive({beer_city %>% filter(City == input$citychoice) %>% select(3,7,9) %>% rename("Beer name" = "Name.x", "Brewery" = "Name.y")
+   })
+   style <- reactive({beer_city %>% filter(Style %in% input$stylechoice)
+     })
+   style2 <- reactive({beer_city %>% filter(Style %in% input$stylechoice)%>% group_by(Style) %>%
+  summarise(meanABV = mean(ABV, na.rm = TRUE)) %>% 
+  ungroup() %>%
+  mutate(Style = fct_reorder(Style, meanABV))
+     })
+   style3 <- reactive({beer_city %>% filter(Style %in% input$stylechoice)%>% group_by(Style) %>%
+  summarise(meanIBU = mean(IBU, na.rm = TRUE)) %>% 
+  ungroup() %>%
+  mutate(Style = fct_reorder(Style, meanIBU))
+     })
+   
+  output$leafplot <- renderLeaflet({
+    leaflet(beer_city) %>%
+  setView(lng = -98.583, lat = 39.833, zoom = 2) %>% 
+  addTiles() %>% 
+  addProviderTiles(providers$Wikimedia) %>% 
+  addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(), popup = content$popup)
+  })
+
+    observe({
+leafletProxy("leafplot") %>%
+        setView(lng = onecity_df()$lng, lat = onecity_df()$lat, zoom = 10)
+  })
+  
+  output$tabletitle <- renderText({
+    (input$citychoice)
+  })
+  
+  output$citybeer <- renderTable({ 
+    onecity_df()
+    })
+  
+  output$lollipop1 <- renderPlot({
+    ggplot(data = style(), aes(x = Style, y = ABV)) +
+  geom_point(data = style2(), aes(y = meanABV), color = "Blue", size = 3) + 
+  geom_point(color = "Red", size = 2) + 
+  geom_segment((aes(x=Style, xend=Style, y=0, yend=ABV))) + coord_flip() + labs(x = "Beer Style", y = "ABV content")
+  })
+  
+  output$lollipop2 <- renderPlot({
+    ggplot(data = style(), aes(x = Style, y = IBU)) +
+  geom_point(data = style3(), aes(y = meanIBU), color = "Blue", size = 3) + 
+  geom_point(color = "Red", size = 2) + 
+  geom_segment((aes(x=Style, xend=Style, y=0, yend=IBU))) + coord_flip() + labs(x = "Beer Style", y = "IBU content")
+  })
+}
+shinyApp(ui, server)
+```
+
