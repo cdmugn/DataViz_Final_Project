@@ -17,3 +17,7 @@ Added another lollipop plot for IBU by style and put my ABV lollipop plot into s
 3/28: after-class
 
 Added the title above the table that changes with the city choice. Realized it may serve me to leave both lollipop plots or I could make them one where user changes the x, I have not decided. The next step is for me to solve the zooming with input problem. I think that needs to be solved.
+
+3/30: beginning of class
+
+Made my leaflet zoom to the input the user picks! I had to spend hours troubleshooting and trying things but I got it.
