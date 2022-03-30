@@ -10,3 +10,7 @@
 3/28: James Wolpe
 
 - Cleaning tennis data and narrowing down number of entries so it is easier to tidy. Final product showing success of tennis players if they follow the pattern of "expected returns" vs. if they don't and how the success has changed over time.
+
+3/30: Jack Sylvia
+
+- Made linear plots of multiple variables, working on adding leaflets that change based on team choice so you can see where they are located in NY state.

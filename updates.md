@@ -21,3 +21,8 @@ Added the title above the table that changes with the city choice. Realized it m
 3/30: beginning of class
 
 Made my leaflet zoom to the input the user picks! I had to spend hours troubleshooting and trying things but I got it.
+
+3/30: after-class
+
+Decided to keep both ABV and IBU lollipop charts for the reasoning that it is one less thing for the user to put in and I think the page can handle it. It is good to compare them and just unnecessary to have another user input here. I completed the tasks of adding a description to the first tab, putting titles on the plots, and changing the layout of the style tab to prepare it for the new map output. Put in the map, but have not made it change the markers based on stylechoice yet.
+
