@@ -14,3 +14,7 @@
 3/30: Jack Sylvia
 
 - Made linear plots of multiple variables, working on adding leaflets that change based on team choice so you can see where they are located in NY state.
+
+4/4:  Burke
+
+- Made mario kart app, trying to get the app to run and appear. Suggested I add another data set with ratings by brewery so I can add that to my breweries tab.

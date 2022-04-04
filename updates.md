@@ -28,3 +28,6 @@ Decided to keep both ABV and IBU lollipop charts for the reasoning that it is on
 
 4/4: beginning of class
 Added a leaflet map that marks on the large scale a dot cluster where each style appears when users picks styles from the style tab. Added a tab where user can choose a brewery with choices of two breweries, two tables of output, and two barplots. Also have a mad that changes markers based on two breweries chosen. Cleaned up a lot of the leaflet proxy and observe commands.
+
+4/4: after-class
+Fixed the zoom so it is adjusting for the two component data set, added text outputs above the columns with plots and table what brewery it is showing information for and removed bar charts because they were not useful. Started adding another data set that rates breweries so I can add that in.
