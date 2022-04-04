@@ -26,14 +26,14 @@ beer_city <- left_join(beer_df, cities_df, by = c("City" = "city")) %>% filter(S
 
 content <- beer_city %>%
   mutate(popup = paste0( beer_city$Name.x,"/",
-                        beer_city$Style))
+                        beer_city$Name.y))
 
 
 beer_map2 <- leaflet(beer_city) %>%
   setView(lng = -98.583, lat = 39.833, zoom = 4) %>% 
   addTiles() %>% 
   addProviderTiles(providers$Wikimedia) %>% 
-  addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(), popup = content$popup)
+  addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(), label = content$popup)
 
 beer_map2
 
@@ -86,100 +86,20 @@ Want to put this plot into a new tab on the shiny app. Have to figure out how to
 Decisions made:
 
 - Change the input of the x so the user can choose either IBU or ABV and they are on the same plot, with the axis label changing conditionally? Could be good to keep both or could be better to have the user choose one. I think I will keep both for the reasoning that it is one less thing for the user to put in and I think the page can handle it.
+ - Added a leaflet map that marks on the large scale a dot cluster where each style appears when users picks styles from the style tab.
+- Added a tab where user can choose a brewery
+- made choices of two brewery options they pick two outputting 
+- Made the two table output 
+- Made plot output for the breweries and angles labels
+- corrected clusters and markers and labels for all of the maps.
 
-```{r}
-library(shiny)
-ui <- fluidPage(
-  titlePanel("Breweries and Beers in U.S.A."),
-  tabsetPanel(tabPanel("Beer Map", 
-    sidebarLayout(sidebarPanel(
-      strong("Welcome!", style = "color:forestgreen"),
-      p("- This data set is a compiled list of over 2,000 beers from various breweries from around the U.S.A."), 
-      p("- Enjoy navigating these tabs in the top left to compare locations, beer styles, and various breweries."), 
-      p("- Select inputs from the selections on the left side of the screen and watch the right side change!"), 
-      p("- The maps can be zoomed in and out further with mouse scrolling or the +/- buttons, and surprises might appear           if you click your mouse in certain places."),
-      p("- Finally, scroll down on the pages to make sure you are not missing any cool content."), 
-      p("Enjoy exploring!", style = "color:forestgreen"),
-    selectizeInput("citychoice",
-                   label = "Choose a City", choices = levels(factor(beer_city$City)),
-                   selected = "Austin"), width = 3),
-    mainPanel(leafletOutput("leafplot"),
-              span(textOutput("tabletitle"), style = "font-size:150%"),
-              tableOutput("citybeer")),
-   )
-  ),
- tabPanel("Styles",
-          fluidRow(
-            column(selectizeInput("stylechoice",
-                           label = "Choose a Style", choice = levels(factor(beer_city$Style)),
-                           selected = "Belgian IPA", multiple = TRUE), width = 2),
-            column(6,
-                    plotOutput("lollipop1"),
-                   plotOutput("lollipop2")),
-            column(3,
-                    leafletOutput("leafplot2"),
-                    offset = 9)
-      ))
-  ))
-server <- function(input, output, session) {
-  
-   onecity_df <- reactive({beer_city %>% filter(City == input$citychoice) %>% rename("Beer name" = "Name.x", "Brewery" = "Name.y")
-   })
-   style <- reactive({beer_city %>% filter(Style %in% input$stylechoice)
-     })
-   style2 <- reactive({beer_city %>% filter(Style %in% input$stylechoice)%>% group_by(Style) %>%
-  summarise(meanABV = mean(ABV, na.rm = TRUE)) %>% 
-  ungroup() %>%
-  mutate(Style = fct_reorder(Style, meanABV))
-     })
-   style3 <- reactive({beer_city %>% filter(Style %in% input$stylechoice)%>% group_by(Style) %>%
-  summarise(meanIBU = mean(IBU, na.rm = TRUE)) %>% 
-  ungroup() %>%
-  mutate(Style = fct_reorder(Style, meanIBU))
-     })
-   
-  output$leafplot <- renderLeaflet({
-    leaflet(beer_city) %>%
-  flyTo(lng = -98.583, lat = 39.833, zoom = 6) %>% 
-  addTiles() %>% 
-  addProviderTiles(providers$Wikimedia) %>% 
-  addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(), label = content$popup)
-  })
-  
-   observe({
-    city <- onecity_df()
-    leafletProxy("leafplot") %>% fitBounds(min(city$lng), min(city$lat),
-                                        max(city$lng+1/4), max(city$lat+1/4))
-  })
-  
-  output$tabletitle <- renderText({
-    (input$citychoice)
-  })
-  
-  output$citybeer <- renderTable({ 
-    onecity_df() %>% select(3,7,9)
-    })
-  
-  output$lollipop1 <- renderPlot({
-    ggplot(data = style(), aes(x = Style, y = ABV)) +
-  geom_point(data = style2(), aes(y = meanABV), color = "Blue", size = 3) + 
-  geom_point(color = "Red", size = 2) + 
-  geom_segment((aes(x=Style, xend=Style, y=0, yend=ABV))) + coord_flip() + labs(x = "Beer Style", y = "ABV content", title = "Average ABV content by Beer Style")
-  })
-  
-  output$lollipop2 <- renderPlot({
-    ggplot(data = style(), aes(x = Style, y = IBU)) +
-  geom_point(data = style3(), aes(y = meanIBU), color = "Blue", size = 3) + 
-  geom_point(color = "Red", size = 2) + 
-  geom_segment((aes(x=Style, xend=Style, y=0, yend=IBU))) + coord_flip() + labs(x = "Beer Style", y = "IBU content", title = "Average IBU content by Beer Style")
-  })
-}
-shinyApp(ui, server)
-```
+Tasks:
+  - a map that adjusts zoom to zoom around the two the user picked. currently do not have the two data sets combined.
+  - come up with a better way to show the style breakdown.
+  - add colors and edit label sizes to make the style and brewery tabs more interesting. 
+  - add text outputs above the columns with plots and table what brewery it is showing information for
 
-- Add a leaflet map that marks on the large scale a dot cluster where each style appears when users picks styles from the style tab.
 
-This has a map but it does not have the observe to change the markers based on which style you choose. Has the observe argument but it does not work yet.
 ```{r}
 library(shiny)
 ui <- fluidPage(
@@ -211,7 +131,24 @@ ui <- fluidPage(
                    plotOutput("lollipop2")),
             column(4,
                     leafletOutput("leafplot2")),
-      ))
+      )),
+ tabPanel("Breweries",
+          fluidRow(
+            column(selectizeInput("brewerychoice",
+                           label = "Choose a Brewery", choice = levels(factor(beer_city$Name.y)),
+                           selected = "NorthGate Brewing"),
+                   selectizeInput("brewerychoice2",
+                            label = "Choose another Brewery", choice = levels(factor(beer_city$Name.y)),
+                            selected = "Avery Brewing Company"), width = 2),
+            column(4,
+                   plotOutput("histogram1"),
+                   tableOutput("brewery1")),
+            column(4,
+                   plotOutput("histogram2"),
+                   tableOutput("brewery2")),
+            column(2,
+                   leafletOutput("leafplot3")),
+          ))
   ))
 server <- function(input, output, session) {
   
@@ -229,6 +166,10 @@ server <- function(input, output, session) {
   ungroup() %>%
   mutate(Style = fct_reorder(Style, meanIBU))
      })
+   onebrewery_df <- reactive({beer_city %>% filter(Name.y == input$brewerychoice) %>% rename("Beer name" = "Name.x", "Brewery" = "Name.y")
+   })
+   onebrewery_df2 <- reactive({beer_city %>% filter(Name.y == input$brewerychoice2) %>% rename("Beer name" = "Name.x", "Brewery" = "Name.y")
+   })
    
   output$leafplot <- renderLeaflet({
     leaflet(beer_city) %>%
@@ -275,13 +216,42 @@ server <- function(input, output, session) {
   
   observe({
     style <- style()
-    leafletProxy("leafplot2") %>% clearMarkers() %>% addMarkers(lng = style$lng, lat = style$lat, clusterOptions = markerClusterOptions(), label = content$popup)
+    leafletProxy("leafplot2") %>% clearMarkerClusters() %>% addMarkers(lng = style$lng, lat = style$lat, label = paste0( style$Name.x,"/", style$Style), clusterOptions = markerClusterOptions())
+    
   })
   
+  output$histogram1 <- renderPlot({
+    ggplot(data = onebrewery_df() %>% group_by(Style), aes(x = Style)) + 
+      geom_bar() + labs(x = "Style", y = "Beer Number", title = "Beer Style Breakdown") + theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+                                                                                                
+  })
+  
+  output$brewery1 <- renderTable({
+    onebrewery_df() %>% select(3,7,9)
+  })
+  
+  output$histogram2 <- renderPlot({
+    ggplot(data = onebrewery_df2() %>% group_by(Style), aes(x = Style)) + 
+      geom_bar() + labs(x = "Style", y = "Beer Number", title = "Beer Style Breakdown") + theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+    
+  })
+  
+  output$brewery2 <- renderTable({
+    onebrewery_df2() %>% select(3,7,9)
+  })
+  
+  output$leafplot3 <- renderLeaflet({
+    leaflet(beer_city) %>%
+  flyTo(lng = -98.583, lat = 39.833, zoom = 3) %>% 
+  addTiles() %>% 
+  addProviderTiles(providers$Wikimedia)
+  })
+  
+  observe({
+    brewery <- onebrewery_df()
+    leafletProxy("leafplot3") %>% clearMarkerClusters() %>% fitBounds(min(brewery$lng), min(brewery$lat),
+                                        max(brewery$lng-2), max(brewery$lat-2)) %>% addMarkers(lng = brewery$lng, lat = brewery$lat, clusterOptions = markerClusterOptions(), label = paste0( brewery$`Beer name`,"/", brewery$Brewery))
+  })
 }
 shinyApp(ui, server)
 ```
-
-Tasks:
-
-- Add a tab where user can choose a brewery

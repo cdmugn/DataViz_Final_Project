@@ -26,3 +26,5 @@ Made my leaflet zoom to the input the user picks! I had to spend hours troublesh
 
 Decided to keep both ABV and IBU lollipop charts for the reasoning that it is one less thing for the user to put in and I think the page can handle it. It is good to compare them and just unnecessary to have another user input here. I completed the tasks of adding a description to the first tab, putting titles on the plots, and changing the layout of the style tab to prepare it for the new map output. Put in the map, but have not made it change the markers based on stylechoice yet.
 
+4/4: beginning of class
+Added a leaflet map that marks on the large scale a dot cluster where each style appears when users picks styles from the style tab. Added a tab where user can choose a brewery with choices of two breweries, two tables of output, and two barplots. Also have a mad that changes markers based on two breweries chosen. Cleaned up a lot of the leaflet proxy and observe commands.
