@@ -18,3 +18,8 @@
 4/4:  Burke
 
 - Made mario kart app, trying to get the app to run and appear. Suggested I add another data set with ratings by brewery so I can add that to my breweries tab.
+
+4/6: Maddox and another person
+
+- working with hospitaldata on shiny and trying to get the plot output to change when the user selects something on the shiny app.
+- working with soccer data to make a shiny app for that.

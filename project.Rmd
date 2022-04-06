@@ -105,13 +105,12 @@ Want to put this plot into a new tab on the shiny app. Have to figure out how to
  
 - removed bar charts because they were not useful
 
-for class: 4/6
-
 - Found and cleaned another dataset with more information per brewery, turned into a csv and read that in so that the app is clean.
 
 - Realized there are no breweries in common between the two data sets so it won't work and I should look for another.
 
- 
+ - Made titles for lollipop charts bigger
+
 
 
 Decisions made:
@@ -120,9 +119,8 @@ Decisions made:
  
  
 Tasks:
-  - add colors and edit label sizes to make the style and brewery tabs more interesting. 
-  - new problem of the zoom map on breweries not showing any markers if there is only one beer at a given brewery.
-
+- make the third map show a marker even if there is only one beer
+- make the third map just show the brewery names permanently, not only when you have selected one. 
 
 ```{r}
 library(shiny)
@@ -223,14 +221,14 @@ server <- function(input, output, session) {
     ggplot(data = style(), aes(x = Style, y = ABV)) +
   geom_point(data = style2(), aes(y = meanABV), color = "Blue", size = 3) + 
   geom_point(color = "Red", size = 2) + 
-  geom_segment((aes(x=Style, xend=Style, y=0, yend=ABV))) + coord_flip() + labs(x = "Beer Style", y = "ABV content", title = "Average ABV content by Beer Style")
+  geom_segment((aes(x=Style, xend=Style, y=0, yend=ABV))) + coord_flip() + labs(x = "Beer Style", y = "ABV content", title = "Average ABV content by Beer Style") + theme(title=element_text(size=14,face="bold",color = "forestgreen"), axis.title = element_text(size = 12, face = "plain", color = "black"))
   })
   
   output$lollipop2 <- renderPlot({
     ggplot(data = style(), aes(x = Style, y = IBU)) +
   geom_point(data = style3(), aes(y = meanIBU), color = "Blue", size = 3) + 
   geom_point(color = "Red", size = 2) + 
-  geom_segment((aes(x=Style, xend=Style, y=0, yend=IBU))) + coord_flip() + labs(x = "Beer Style", y = "IBU content", title = "Average IBU content by Beer Style")
+  geom_segment((aes(x=Style, xend=Style, y=0, yend=IBU))) + coord_flip() + labs(x = "Beer Style", y = "IBU content", title = "Average IBU content by Beer Style") + theme(title=element_text(size=14,face="bold", color = "forestgreen"), axis.title = element_text(size = 12, face = "plain", color = "black"))
   })
   
   output$leafplot2 <- renderLeaflet({
@@ -271,9 +269,10 @@ server <- function(input, output, session) {
   
   observe({
     brewery <- both_breweries()
-     leafletProxy("leafplot3") %>% clearMarkerClusters() %>% fitBounds(min(brewery$lng), min(brewery$lat), max(brewery$lng+1/2), max(brewery$lat-1/2)) %>% addMarkers(lng = brewery$lng, lat = brewery$lat, clusterOptions = markerClusterOptions(), label = paste0( brewery$`Beer name`,"/", brewery$Brewery)) 
+     leafletProxy("leafplot3") %>% clearMarkers() %>% fitBounds(min(brewery$lng), min(brewery$lat), max(brewery$lng+1/2), max(brewery$lat-1/2)) %>%   addMarkers(lng = brewery$lng, lat = brewery$lat, popup = paste0( brewery$Brewery), 
+    label = paste0( brewery$Brewery))
   })
 }
 shinyApp(ui, server)
 ```
-
+- May have to use an if statement so that a marker is only made for each new point and then I can remove clusters and still have markers appear. 
