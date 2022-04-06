@@ -31,3 +31,8 @@ Added a leaflet map that marks on the large scale a dot cluster where each style
 
 4/4: after-class
 Fixed the zoom so it is adjusting for the two component data set, added text outputs above the columns with plots and table what brewery it is showing information for and removed bar charts because they were not useful. Started adding another data set that rates breweries so I can add that in.
+
+4/6: beginning of class
+Found and cleaned another dataset with more information per brewery, turned into a csv and read that in so that the app only has the read_csv command in it. I then realized there are no breweries in common between the two data sets so it won't work and I should look for another.
+
+ 

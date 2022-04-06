@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Making a shiny app - working with data from a git hub repositorydata set, converted to a csv for me to use
+Making a shiny app - working with data from a git hub repository data set, converted to a csv for me to use
 
 ```{r}
 library(tidyverse)
@@ -18,23 +18,15 @@ library(maps)
 library(leaflet)
 library(ggplot2)
 
-library(rvest)
 
-## provide the URL and name it something (in this case, url).
-url <- "https://github.com/amthomps/BeerRatings/blob/master/breweries.csv"
-
-## convert the html code into something R can read
-h <- read_html(url)
-
-## grabs the tables
-tab <- h %>% html_nodes("table")
-
-
+rating_df <- read_csv("data/ratings.csv")
 cities_df <- read_csv("data/uscities.csv")
 beer_df <- read_csv("data/beer.csv")
 state_df <- ggplot2::map_data("state")
 
 beer_city <- left_join(beer_df, cities_df, by = c("City" = "city")) %>% filter(State == state_id) %>% select(1:11, 17:19)
+
+# beer_ratings <- full_join(rating_df,beer_city, by = c("Brewery" = "Name.x"))
 
 content <- beer_city %>%
   mutate(popup = paste0( beer_city$Name.x,"/",
@@ -112,6 +104,13 @@ Want to put this plot into a new tab on the shiny app. Have to figure out how to
 - added text outputs above the columns with plots and table what brewery it is showing information for
  
 - removed bar charts because they were not useful
+
+for class: 4/6
+
+- Found and cleaned another dataset with more information per brewery, turned into a csv and read that in so that the app is clean.
+
+- Realized there are no breweries in common between the two data sets so it won't work and I should look for another.
+
  
 
 
@@ -122,8 +121,7 @@ Decisions made:
  
 Tasks:
   - add colors and edit label sizes to make the style and brewery tabs more interesting. 
-  - new problem of the zoom map on breweries not showing any markers if there is only one beer at a given brewery
-  - maybe find another dataset with more information per brewery to add to the brewery tab.
+  - new problem of the zoom map on breweries not showing any markers if there is only one beer at a given brewery.
 
 
 ```{r}
