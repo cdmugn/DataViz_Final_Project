@@ -111,17 +111,15 @@ Want to put this plot into a new tab on the shiny app. Have to figure out how to
 
  - Made titles for lollipop charts bigger
 
+- Made the third map show a point even if only one beer
+
+- Made the lines have markers at the end of them so they are easier to use.
 
 
 Decisions made:
 
 - Change the input of the x so the user can choose either IBU or ABV and they are on the same plot, with the axis label changing conditionally? Could be good to keep both or could be better to have the user choose one. I think I will keep both for the reasoning that it is one less thing for the user to put in and I think the page can handle it.
  
- 
-Tasks:
-- make the third map show a marker even if there is only one beer
-- make the third map just show the brewery names permanently, not only when you have selected one. 
-
 ```{r}
 library(shiny)
 ui <- fluidPage(
@@ -195,12 +193,13 @@ server <- function(input, output, session) {
    both_breweries <- reactive({full_join(onebrewery_df(), onebrewery_df2())
    })
    
-  output$leafplot <- renderLeaflet({
+   
+   output$leafplot <- renderLeaflet({
     leaflet(beer_city) %>%
   flyTo(lng = -98.583, lat = 39.833, zoom = 6) %>% 
   addTiles() %>% 
   addProviderTiles(providers$Wikimedia) %>% 
-  addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(), label = content$popup)
+  addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(singleMarkerMode = TRUE), label = content$popup)
   })
   
    observe({
@@ -240,7 +239,7 @@ server <- function(input, output, session) {
   
   observe({
     style <- style()
-    leafletProxy("leafplot2") %>% clearMarkerClusters() %>% addMarkers(lng = style$lng, lat = style$lat, label = paste0( style$Name.x,"/", style$Style), clusterOptions = markerClusterOptions())
+    leafletProxy("leafplot2") %>% clearMarkerClusters() %>% addMarkers(lng = style$lng, lat = style$lat, label = paste0( style$Name.x,"/", style$Style, "/", style$Name.y), clusterOptions = markerClusterOptions(singleMarkerMode = TRUE))
     
   })
   
@@ -269,10 +268,11 @@ server <- function(input, output, session) {
   
   observe({
     brewery <- both_breweries()
-     leafletProxy("leafplot3") %>% clearMarkers() %>% fitBounds(min(brewery$lng), min(brewery$lat), max(brewery$lng+1/2), max(brewery$lat-1/2)) %>%   addMarkers(lng = brewery$lng, lat = brewery$lat, popup = paste0( brewery$Brewery), 
-    label = paste0( brewery$Brewery))
+     leafletProxy("leafplot3") %>% clearMarkers() %>% clearMarkerClusters() %>% fitBounds(min(brewery$lng), min(brewery$lat), max(brewery$lng+1/2), max(brewery$lat-1/2)) %>% addMarkers(lng = brewery$lng, lat = brewery$lat, label = paste0( brewery$Brewery), clusterOptions = markerClusterOptions(singleMarkerMode = TRUE))
   })
 }
+
 shinyApp(ui, server)
 ```
-- May have to use an if statement so that a marker is only made for each new point and then I can remove clusters and still have markers appear. 
+
+Tasks: Find another data set with ratings and add that, now that everything here is satisfactory.

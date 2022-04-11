@@ -38,4 +38,8 @@ Found and cleaned another dataset with more information per brewery, turned into
 4/6: after-class
 More effort to troubleshoot the maps clustering and acting strange when only one observation is shown for a certain brewery.
 
+4/11: before class 
+Fixed third map to show markers for a single beer, and changed it from lines to scrollover points.
+
+
  
