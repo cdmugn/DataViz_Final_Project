@@ -21,5 +21,9 @@
 
 4/6: Maddox and another person
 
-- working with hospitaldata on shiny and trying to get the plot output to change when the user selects something on the shiny app.
+- working with hospital data on shiny and trying to get the plot output to change when the user selects something on the shiny app.
 - working with soccer data to make a shiny app for that.
+
+4/18: Alyssa
+
+-Working with baseball data to show salaries for players, allowing user to change a lot of the input.

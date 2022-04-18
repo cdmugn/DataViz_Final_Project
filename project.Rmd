@@ -59,6 +59,12 @@ ggplot(data = beer_city, aes(x = Style, y = ABV)) +
   geom_point(data = style_df, aes(y = meanABV), color = "Blue", size =2) + 
   geom_point(color = "Red", size = .5) + 
   geom_segment((aes(x=Style, xend=Style, y=0, yend=ABV))) + coord_flip() + labs(x = "Beer Style", y = "ABV content")
+
+beer_city$StyleColor <- cut(beer_city$Style_rating, 
+                        c(3.4, 3.55,3.7,3.85,4.1), include.lowest = T,
+                        labels = c('3.4-3.55', '3.55-3.7', '3.7-3.85', '3.85-4.1'), na.rm=TRUE)
+
+StyleCol <- colorFactor(palette = 'BuPu', beer_city$StyleColor)
 ```
 
 Want to put this plot into a new tab on the shiny app. Have to figure out how to make a new tab and then put this onto it. -Got the input, need to put in reactive data set.
@@ -118,6 +124,8 @@ Want to put this plot into a new tab on the shiny app. Have to figure out how to
 
 - Made labels say what they are showing, and be bold, and be multiple lines, not just slashes between.
 
+- Corrected brewery tab so the map does not resize everytime you change it.
+
 
 Decisions made:
 
@@ -127,7 +135,173 @@ Decisions made:
 Tasks: 
 - Find a data set with ratings by beer or brewery, not just style.
 
-- Could color circles by style rating... complicated but possible.
+```{r}
+library(shiny)
+ui <- fluidPage(
+  titlePanel("Breweries and Beers in U.S.A."),
+  tabsetPanel(tabPanel("Beer Map", 
+    sidebarLayout(sidebarPanel(
+      strong("Welcome!", style = "color:forestgreen"),
+      p("- This data set is a compiled list of over 2,000 beers from various breweries from around the U.S.A."), 
+      p("- Enjoy navigating these tabs in the top left to compare locations, beer styles, and various breweries."), 
+      p("- Select inputs from the selections on the left side of the screen and watch the right side change!"), 
+      p("- The maps can be zoomed in and out further with mouse scrolling or the +/- buttons, and surprises might appear           if you click your mouse in certain places."),
+      p("- Finally, scroll down on the pages to make sure you are not missing any cool content."), 
+      p("Enjoy exploring!", style = "color:forestgreen"),
+    selectizeInput("citychoice",
+                   label = "Choose a City", choices = levels(factor(beer_city$City)),
+                   selected = "Austin"), width = 3),
+    mainPanel(leafletOutput("leafplot"),
+              span(textOutput("tabletitle"), style = "font-size:150%"),
+              tableOutput("citybeer")),
+   )
+  ),
+ tabPanel("Styles",
+          fluidRow(
+            column(selectizeInput("stylechoice",
+                           label = "Choose a Style or Multiple", choice = levels(factor(beer_city$Style)),
+                           selected = "Belgian IPA", multiple = TRUE), width = 2),
+            column(6,
+                    plotOutput("lollipop1"),
+                   plotOutput("lollipop2")),
+            column(4,
+                    leafletOutput("leafplot2"),
+                   tableOutput("stylerating")),
+      )),
+ tabPanel("Breweries",
+          fluidRow(
+            column(selectizeInput("brewerychoice",
+                           label = "Choose a Brewery", choice = levels(factor(beer_city$Name.y)),
+                           selected = "NorthGate Brewing"),
+                   selectizeInput("brewerychoice2",
+                            label = "Choose another Brewery", choice = levels(factor(beer_city$Name.y)),
+                            selected = "Avery Brewing Company"), width = 2),
+            column(3,
+                   span(textOutput("tabletitle2"), style = "font-size:150%"),
+                   tableOutput("brewery1")),
+            column(3,
+                   span(textOutput("tabletitle3"), style = "font-size:150%"),
+                   tableOutput("brewery2")),
+            column(3,
+                   leafletOutput("leafplot3")),
+          ))
+  ))
+server <- function(input, output, session) {
+  
+   onecity_df <- reactive({beer_city %>% filter(City == input$citychoice) %>% rename("Beer name" = "Name.x", "Brewery" = "Name.y")
+   })
+   style <- reactive({beer_city %>% filter(Style %in% input$stylechoice)
+     })
+   style2 <- reactive({beer_city %>% filter(Style %in% input$stylechoice)%>% group_by(Style) %>%
+  summarise(meanABV = mean(ABV, na.rm = TRUE)) %>% 
+  ungroup() %>%
+  mutate(Style = fct_reorder(Style, meanABV))
+     })
+   style3 <- reactive({beer_city %>% filter(Style %in% input$stylechoice)%>% group_by(Style) %>%
+  summarise(meanIBU = mean(IBU, na.rm = TRUE)) %>% 
+  ungroup() %>%
+  mutate(Style = fct_reorder(Style, meanIBU))
+     })
+   style4 <- reactive({beer_city %>% filter(Style %in% input$stylechoice) %>% group_by(Style) %>% summarise(Mean_Rating = mean(Style_rating, na.rm = TRUE)) %>%
+  mutate(Style = fct_reorder(Style, Mean_Rating))
+     })
+   onebrewery_df <- reactive({beer_city %>% filter(Name.y == input$brewerychoice) %>% rename("Beer name" = "Name.x", "Brewery" = "Name.y")
+   })
+   onebrewery_df2 <- reactive({beer_city %>% filter(Name.y == input$brewerychoice2) %>% rename("Beer name" = "Name.x", "Brewery" = "Name.y")
+   })
+   both_breweries <- reactive({full_join(onebrewery_df(), onebrewery_df2())
+   })
+   
+   
+   output$leafplot <- renderLeaflet({
+    leaflet(beer_city) %>%
+  flyTo(lng = -98.583, lat = 39.833, zoom = 6) %>% 
+  addTiles() %>% 
+  addProviderTiles(providers$Wikimedia) %>% 
+  addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(singleMarkerMode = TRUE), label = lapply(paste("<strong> Beer name: </strong>", beer_city$Name.x,"<br> <strong> Brewery name: </strong>", beer_city$Name.y), htmltools::HTML))
+  })
+  
+   observe({
+    city <- onecity_df()
+    leafletProxy("leafplot") %>% fitBounds(min(city$lng), min(city$lat),
+                                        max(city$lng+1/4), max(city$lat+1/4))
+  })
+  
+  output$tabletitle <- renderText({
+    (input$citychoice)
+  })
+  
+  output$citybeer <- renderTable({ 
+    onecity_df() %>% select(3,7,9)
+    })
+  
+  output$lollipop1 <- renderPlot({
+    ggplot(data = style(), aes(x = Style, y = ABV)) +
+  geom_point(data = style2(), aes(y = meanABV), color = "Blue", size = 3) + 
+  geom_point(color = "Red", size = 2) + 
+  geom_segment((aes(x=Style, xend=Style, y=0, yend=ABV))) + coord_flip() + labs(x = "Beer Style", y = "ABV content", title = "Average ABV content by Beer Style") + theme(title=element_text(size=14,face="bold",color = "forestgreen"), axis.title = element_text(size = 12, face = "plain", color = "black"))
+  })
+  
+  output$lollipop2 <- renderPlot({
+    ggplot(data = style(), aes(x = Style, y = IBU)) +
+  geom_point(data = style3(), aes(y = meanIBU), color = "Blue", size = 3) + 
+  geom_point(color = "Red", size = 2) + 
+  geom_segment((aes(x=Style, xend=Style, y=0, yend=IBU))) + coord_flip() + labs(x = "Beer Style", y = "IBU content", title = "Average IBU content by Beer Style") + theme(title=element_text(size=14,face="bold", color = "forestgreen"), axis.title = element_text(size = 12, face = "plain", color = "black"))
+  })
+  
+  output$leafplot2 <- renderLeaflet({
+    leaflet(beer_city) %>%
+  flyTo(lng = -98.583, lat = 39.833, zoom = 3) %>% 
+  addTiles() %>% 
+  addProviderTiles(providers$Wikimedia)
+  })
+
+  observe({
+    style <- style()
+    leafletProxy("leafplot2") %>% clearMarkerClusters() %>% addCircleMarkers(lng = style$lng, lat = style$lat, label = lapply(paste( "<strong> Beer name: </strong>", style$Name.x, "<br> <strong> Beer style: </strong>", style$Style, "<br> <strong> Brewery name: </strong>", style$Name.y), htmltools::HTML), clusterOptions = markerClusterOptions(singleMarkerMode = TRUE))
+    
+  })
+  
+  output$stylerating <- renderTable({ 
+    style4()
+    })
+  
+  output$tabletitle2 <- renderText({
+    (input$brewerychoice)
+  })
+  
+  output$brewery1 <- renderTable({
+    onebrewery_df() %>% select(3,7,9)
+  })
+  
+  output$tabletitle3 <- renderText({
+    (input$brewerychoice2)
+  })
+  
+  output$brewery2 <- renderTable({
+    onebrewery_df2() %>% select(3,7,9)
+  })
+  
+  output$leafplot3 <- renderLeaflet({
+    leaflet(beer_city) %>%
+  flyTo(lng = -98.583, lat = 39.833, zoom = 3) %>% 
+  addTiles() %>% 
+  addProviderTiles(providers$Wikimedia)
+  })
+  
+  observe({
+    brewery <- both_breweries()
+     leafletProxy("leafplot3") %>% clearMarkers() %>% clearMarkerClusters() %>% fitBounds(min(brewery$lng), min(brewery$lat), max(brewery$lng+1/2), max(brewery$lat-1/2)) %>% addMarkers(lng = brewery$lng, lat = brewery$lat, label = lapply(paste0( " <strong> Brewery name: </strong>", brewery$Brewery), htmltools::HTML), clusterOptions = markerClusterOptions(singleMarkerMode = TRUE))
+  })
+}
+
+shinyApp(ui, server)
+```
+
+
+- Could color circles by style rating... complicated but possible. - This is very difficult, coming back to it another time.
+
+
 ```{r}
 library(shiny)
 ui <- fluidPage(
@@ -251,7 +425,9 @@ server <- function(input, output, session) {
 
   observe({
     style <- style()
-    leafletProxy("leafplot2") %>% clearMarkerClusters() %>% addCircleMarkers(lng = style$lng, lat = style$lat, label = lapply(paste( "<strong> Beer name: </strong>", style$Name.x, "<br> <strong> Beer style: </strong>", style$Style, "<br> <strong> Brewery name: </strong>", style$Name.y), htmltools::HTML), clusterOptions = markerClusterOptions(singleMarkerMode = TRUE))
+    leafletProxy("leafplot2") %>% clearMarkerClusters() %>% addCircleMarkers(lng = style$lng, lat = style$lat, label = lapply(paste( "<strong> Beer name: </strong>", style$Name.x, "<br> <strong> Beer style: </strong>", style$Style, "<br> <strong> Brewery name: </strong>", style$Name.y), htmltools::HTML), color = ~StyleCol(StyleColor), clusterOptions = markerClusterOptions(singleMarkerMode = TRUE)) %>%  addLegend('bottomright', pal = StyleCol, values = beer_city$StyleColor,
+            title = 'Style Rating',
+            opacity = 1)
     
   })
   
@@ -290,5 +466,3 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server)
 ```
-
-

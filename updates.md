@@ -47,5 +47,7 @@ Found another data set with ratings by style and added that to the beer_city dat
 4/18: beginning of class
 Fixed style table so it is grouped and made labels say what they are showing, and be bold, and be multiple lines, not just slashes between.
 
+4/18: after-class
+Fixed third map so it does not move and resize every time you change it. Worked a lot on color coding markers for style rating, I think I am close but it isn't working yet. 
 
  
