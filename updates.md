@@ -41,5 +41,11 @@ More effort to troubleshoot the maps clustering and acting strange when only one
 4/11: before class 
 Fixed third map to show markers for a single beer, and changed it from lines to scrollover points.
 
+4/13: before class
+Found another data set with ratings by style and added that to the beer_city data set and added a table to the style tab that has the ratings for the styles user has selected
+
+4/18: beginning of class
+Fixed style table so it is grouped and made labels say what they are showing, and be bold, and be multiple lines, not just slashes between.
+
 
  
