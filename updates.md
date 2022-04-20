@@ -50,4 +50,6 @@ Fixed style table so it is grouped and made labels say what they are showing, an
 4/18: after-class
 Fixed third map so it does not move and resize every time you change it. Worked a lot on color coding markers for style rating, I think I am close but it isn't working yet. 
 
+4/20: beginning of class
+Colored circles by style rating in the style tab. I had to define a way to breakup the data and make a legend.
  
