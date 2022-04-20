@@ -64,7 +64,7 @@ beer_city$StyleColor <- cut(beer_city$Style_rating,
                         c(3.4, 3.55,3.7,3.85,4.1), include.lowest = T,
                         labels = c('3.4-3.55', '3.55-3.7', '3.7-3.85', '3.85-4.1'), na.rm=TRUE)
 
-StyleCol <- colorFactor(palette = 'BuPu', beer_city$StyleColor)
+StyleCol <- colorFactor(palette = 'PuRd', beer_city$StyleColor)
 ```
 
 Want to put this plot into a new tab on the shiny app. Have to figure out how to make a new tab and then put this onto it. -Got the input, need to put in reactive data set.
@@ -128,15 +128,23 @@ Want to put this plot into a new tab on the shiny app. Have to figure out how to
 
 - Colored circles by style rating in the style tab.
 
+- Added a data set with ratings by beer, not just style.
+
+- Changed color scale so it is easier to see on the white background
+
+- Changed marker color in brewery tab to be by style
+
+
 
 Decisions made:
 
 - Change the input of the x so the user can choose either IBU or ABV and they are on the same plot, with the axis label changing conditionally? Could be good to keep both or could be better to have the user choose one. I think I will keep both for the reasoning that it is one less thing for the user to put in and I think the page can handle it.
- 
 
-Tasks: 
-- Find a data set with ratings by beer or brewery, not just style.
+- I did all the work to add a huge ratings data set but because the crossover is so limited I think I will have to remove it and find something else to add.
 
+Tasks:
+
+- I may change the cut offs in my color scale so they change more, right now most beers are in the same category. So an evenly split range might not be in my best interest.
 
 ```{r}
 library(shiny)
@@ -179,13 +187,13 @@ ui <- fluidPage(
                    selectizeInput("brewerychoice2",
                             label = "Choose another Brewery", choice = levels(factor(beer_city$Name.y)),
                             selected = "Avery Brewing Company"), width = 2),
-            column(5,
+            column(3,
                    span(textOutput("tabletitle2"), style = "font-size:150%"),
                    tableOutput("brewery1")),
-            column(5,
+            column(3,
                    span(textOutput("tabletitle3"), style = "font-size:150%"),
                    tableOutput("brewery2")),
-            column(5,
+            column(3,
                    leafletOutput("leafplot3")),
           ))
   ))
@@ -294,9 +302,11 @@ server <- function(input, output, session) {
   
   observe({
     brewery <- both_breweries()
-     leafletProxy("leafplot3") %>% clearMarkers() %>% clearMarkerClusters() %>% fitBounds(min(brewery$lng), min(brewery$lat), max(brewery$lng+1/2), max(brewery$lat-1/2)) %>% addMarkers(lng = brewery$lng, lat = brewery$lat, label = lapply(paste0( " <strong> Brewery name: </strong>", brewery$Brewery), htmltools::HTML), clusterOptions = markerClusterOptions(singleMarkerMode = TRUE))
+    style <- style()
+     leafletProxy("leafplot3") %>% clearControls() %>% clearMarkers() %>% clearMarkerClusters() %>% fitBounds(min(brewery$lng), min(brewery$lat), max(brewery$lng+1/2), max(brewery$lat-1/2)) %>% addCircleMarkers(lng = brewery$lng, lat = brewery$lat, label = lapply(paste( "<strong> Beer name: </strong>", brewery$`Beer name`, "<br> <strong> Beer style: </strong>", brewery$Style, "<br> <strong> Brewery name: </strong>", brewery$Brewery), htmltools::HTML), clusterOptions = markerClusterOptions(singleMarkerMode = TRUE), color = StyleCol(style$StyleColor)) %>% addLegend('bottomright', pal = StyleCol, values = beer_city$StyleColor, title = 'Style Rating', opacity = 1)
   })
 }
 
 shinyApp(ui, server)
 ```
+

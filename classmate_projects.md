@@ -27,3 +27,7 @@
 4/18: Alyssa
 
 -Working with baseball data to show salaries for players, allowing user to change a lot of the input.
+
+4/20: Jonathon Burger
+
+- doing blogdown project with multiple data sets, and compiling together into a blog post.

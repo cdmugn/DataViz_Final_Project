@@ -52,4 +52,7 @@ Fixed third map so it does not move and resize every time you change it. Worked 
 
 4/20: beginning of class
 Colored circles by style rating in the style tab. I had to define a way to breakup the data and make a legend.
+
+4/20: after-class
+Added a data set to the main one with ratings by beer, not just style. Struggling with whether or not it is worth including the ratings with that many NA values. I decided it isn't worth including the ratings per beer if there are so many NA values. Also changed the marker color in the brewery tab to be by specific style.
  
