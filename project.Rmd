@@ -61,10 +61,10 @@ ggplot(data = beer_city, aes(x = Style, y = ABV)) +
   geom_segment((aes(x=Style, xend=Style, y=0, yend=ABV))) + coord_flip() + labs(x = "Beer Style", y = "ABV content")
 
 beer_city$StyleColor <- cut(beer_city$Style_rating, 
-                        c(3.4, 3.55,3.7,3.85,4.1), include.lowest = T,
-                        labels = c('3.4-3.55', '3.55-3.7', '3.7-3.85', '3.85-4.1'), na.rm=TRUE)
+                        c(3.4, 3.7,3.8,3.9,4.1), include.lowest = T,
+                        labels = c('3.4-3.7', '3.7-3.8', '3.8-3.9', '3.9-4.1'), na.rm=TRUE)
 
-StyleCol <- colorFactor(palette = 'PuRd', beer_city$StyleColor)
+StyleCol <- colorFactor(palette = 'BuPu', beer_city$StyleColor)
 ```
 
 Want to put this plot into a new tab on the shiny app. Have to figure out how to make a new tab and then put this onto it. -Got the input, need to put in reactive data set.
@@ -134,6 +134,11 @@ Want to put this plot into a new tab on the shiny app. Have to figure out how to
 
 - Changed marker color in brewery tab to be by style
 
+- Changed the cut offs in my color scale so they change more, right now most beers are in the same category. So an evenly split range might not be in my best interest.
+
+- Fixed fill so you can see markers better
+
+- De-bugged the brewery tab a bit
 
 
 Decisions made:
@@ -144,7 +149,6 @@ Decisions made:
 
 Tasks:
 
-- I may change the cut offs in my color scale so they change more, right now most beers are in the same category. So an evenly split range might not be in my best interest.
 
 ```{r}
 library(shiny)
@@ -269,7 +273,7 @@ server <- function(input, output, session) {
 
   observe({
     style <- style()
-    leafletProxy("leafplot2") %>% clearControls() %>% clearMarkerClusters() %>% addCircleMarkers(lng = style$lng, lat = style$lat, label = lapply(paste( "<strong> Beer name: </strong>", style$Name.x, "<br> <strong> Beer style: </strong>", style$Style, "<br> <strong> Brewery name: </strong>", style$Name.y), htmltools::HTML), color = StyleCol(style$StyleColor), clusterOptions = markerClusterOptions(singleMarkerMode = TRUE)) %>%  addLegend('bottomright', pal = StyleCol, values = beer_city$StyleColor, title = 'Style Rating', opacity = 1)
+    leafletProxy("leafplot2") %>% clearControls() %>% clearMarkerClusters() %>% addCircleMarkers(lng = style$lng, lat = style$lat, label = lapply(paste( "<strong> Beer name: </strong>", style$Name.x, "<br> <strong> Beer style: </strong>", style$Style, "<br> <strong> Brewery name: </strong>", style$Name.y), htmltools::HTML), color = StyleCol(style$StyleColor), clusterOptions = markerClusterOptions(singleMarkerMode = TRUE), opacity = 2, fillOpacity = .5) %>%  addLegend('bottomright', pal = StyleCol, values = beer_city$StyleColor, title = 'Style Rating', opacity = 1)
     
   })
   
@@ -303,7 +307,7 @@ server <- function(input, output, session) {
   observe({
     brewery <- both_breweries()
     style <- style()
-     leafletProxy("leafplot3") %>% clearControls() %>% clearMarkers() %>% clearMarkerClusters() %>% fitBounds(min(brewery$lng), min(brewery$lat), max(brewery$lng+1/2), max(brewery$lat-1/2)) %>% addCircleMarkers(lng = brewery$lng, lat = brewery$lat, label = lapply(paste( "<strong> Beer name: </strong>", brewery$`Beer name`, "<br> <strong> Beer style: </strong>", brewery$Style, "<br> <strong> Brewery name: </strong>", brewery$Brewery), htmltools::HTML), clusterOptions = markerClusterOptions(singleMarkerMode = TRUE), color = StyleCol(style$StyleColor)) %>% addLegend('bottomright', pal = StyleCol, values = beer_city$StyleColor, title = 'Style Rating', opacity = 1)
+     leafletProxy("leafplot3") %>% clearControls() %>% clearMarkers() %>% clearMarkerClusters() %>% fitBounds(min(brewery$lng), min(brewery$lat), max(brewery$lng+1/2), max(brewery$lat-1/2)) %>% addCircleMarkers(lng = brewery$lng, lat = brewery$lat, label = lapply(paste( "<strong> Beer name: </strong>", brewery$`Beer name`, "<br> <strong> Beer style: </strong>", brewery$Style, "<br> <strong> Brewery name: </strong>", brewery$Brewery), htmltools::HTML), clusterOptions = markerClusterOptions(singleMarkerMode = TRUE), color = StyleCol(brewery$StyleColor), opacity = 2, fillOpacity = .5) %>% addLegend('topright', pal = StyleCol, values = beer_city$StyleColor, title = 'Style Rating', opacity = 1)
   })
 }
 

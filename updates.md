@@ -55,4 +55,7 @@ Colored circles by style rating in the style tab. I had to define a way to break
 
 4/20: after-class
 Added a data set to the main one with ratings by beer, not just style. Struggling with whether or not it is worth including the ratings with that many NA values. I decided it isn't worth including the ratings per beer if there are so many NA values. Also changed the marker color in the brewery tab to be by specific style.
+
+4/ 25: beginning of class
+Changed the cut offs in my color scale so they change more, right now most beers are in the same category. So an evenly split range might not be in my best interest. Fixed fill so you can see markers better and de-bugged the brewery tab a bit.
  
