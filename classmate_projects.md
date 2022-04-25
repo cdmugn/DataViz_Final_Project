@@ -31,3 +31,7 @@
 4/20: Jonathon Burger
 
 - doing blogdown project with multiple data sets, and compiling together into a blog post.
+
+4/ 25: Lily 
+
+- Doing Blogdown post on donations to sports teams from rich people, what political party they are in and how much they donated. A lot of different stats shown.

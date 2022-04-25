@@ -58,4 +58,7 @@ Added a data set to the main one with ratings by beer, not just style. Strugglin
 
 4/ 25: beginning of class
 Changed the cut offs in my color scale so they change more, right now most beers are in the same category. So an evenly split range might not be in my best interest. Fixed fill so you can see markers better and de-bugged the brewery tab a bit.
+
+4/25: after-class
+Working on coloring the lollipops by the same scale as the leaflet - have them changing for style rating but the color scale does not match. Came up with a strategy to get this coloring accomplished.
  
