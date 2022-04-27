@@ -35,3 +35,8 @@
 4/ 25: Lily 
 
 - Doing Blogdown post on donations to sports teams from rich people, what political party they are in and how much they donated. A lot of different stats shown.
+
+4/27: Maddox and James
+
+- Maternity data, has multiple p[ages to shiny app and changing maps and plots, with an overall theme which I also applied after seeing as it made it look a lot more professional. 
+- James has tennis data, working but not very detailed right now. Hopping to add more before he has to present.

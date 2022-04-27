@@ -17,6 +17,7 @@ library (readr)
 library(maps)
 library(leaflet)
 library(ggplot2)
+library(shinythemes)
 
 rating_df <- read_csv("data/stylereview.csv")
 cities_df <- read_csv("data/uscities.csv")
@@ -64,10 +65,10 @@ beer_city$StyleColor <- cut(beer_city$Style_rating,
                         c(2.1, 3.7,3.8,3.9,4.1), include.lowest = T,
                         labels = c('< 3.7', '3.7-3.8', '3.8-3.9', '3.9-4.1'), na.rm=TRUE)
 
-StyleCol <- colorFactor(palette = 'BuPu', beer_city$StyleColor)
+StyleCol <- colorFactor(c("#BFD3E6", "#9EBCDA", "#8C96C6", "#88419D"), beer_city$StyleColor)
 
-colScale <- scale_colour_manual("StyleColor", breaks = c('< 3.7', '3.7-3.8', '3.8-3.9', '3.9-4.1'),
-                                values = c("#E0ECF4", "#9EBCDA", "#8C96C6", "#88419D"))
+colScale <- scale_colour_manual("Style Rating", breaks = c('< 3.7', '3.7-3.8', '3.8-3.9', '3.9-4.1'),
+                                values = c("#BFD3E6", "#9EBCDA", "#8C96C6", "#88419D"))
 ```
 
 Want to put this plot into a new tab on the shiny app. Have to figure out how to make a new tab and then put this onto it. -Got the input, need to put in reactive data set.
@@ -149,8 +150,13 @@ Want to put this plot into a new tab on the shiny app. Have to figure out how to
 
 - Changed theme and color so that everything looks good and matches
 
+-----------------
 
+- Changed colors again because I realized you can't see the NA's well on the plot
 
+- Changed name of color scale 
+
+- Change whole shiny theme to look more professional
 
 Decisions made:
 
@@ -160,7 +166,7 @@ Decisions made:
 
 ```{r}
 library(shiny)
-ui <- fluidPage(
+ui <- fluidPage(theme = shinytheme("cyborg"),
   titlePanel("Breweries and Beers in U.S.A."),
   tabsetPanel(tabPanel("Beer Map", 
     sidebarLayout(sidebarPanel(
@@ -241,7 +247,7 @@ server <- function(input, output, session) {
   flyTo(lng = -98.583, lat = 39.833, zoom = 6) %>% 
   addTiles() %>% 
   addProviderTiles(providers$Wikimedia) %>% 
-  addMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(singleMarkerMode = TRUE, color = "Purple"), label = lapply(paste("<strong> Beer name: </strong>", beer_city$Name.x,"<br> <strong> Brewery name: </strong>", beer_city$Name.y), htmltools::HTML))
+  addCircleMarkers(lng = beer_city$lng, lat = beer_city$lat, clusterOptions = markerClusterOptions(singleMarkerMode = TRUE, color = "Lightpurple"), label = lapply(paste("<strong> Beer name: </strong>", beer_city$Name.x,"<br> <strong> Brewery name: </strong>", beer_city$Name.y), htmltools::HTML))
   })
   
    observe({
@@ -265,7 +271,7 @@ server <- function(input, output, session) {
   colScale +
   geom_segment((aes(x=Style, xend=Style, y=0, yend=ABV))) + 
   coord_flip() + 
-  labs(x = "Beer Style", y = "ABV content", title = "Average ABV content by Beer Style") + theme_dark() + theme(title=element_text(size=14,face="bold",color = "darkorange3"), axis.title = element_text(size = 12, face = "plain", color = "darkorange3"))
+  labs(x = "Beer Style", y = "ABV content", title = "Average ABV content by Beer Style") + theme_gray() + theme(title=element_text(size=14,face="bold",color = "darkorange3"), axis.title = element_text(size = 12, face = "plain", color = "darkorange3"))
   })
   
   output$lollipop2 <- renderPlot({
@@ -275,7 +281,7 @@ server <- function(input, output, session) {
   colScale +
   geom_segment((aes(x=Style, xend=Style, y=0, yend=IBU))) + 
   coord_flip() + 
-  labs(x = "Beer Style", y = "IBU content", title = "Average IBU content by Beer Style") + theme_dark() + theme(title=element_text(size=14,face="bold", color = "darkorange3"), axis.title = element_text(size = 12, face = "plain", color = "darkorange3"))
+  labs(x = "Beer Style", y = "IBU content", title = "Average IBU content by Beer Style") + theme_gray()  + theme(title=element_text(size=14,face="bold", color = "darkorange3"), axis.title = element_text(size = 12, face = "plain", color = "darkorange3"))
   })
   
   output$leafplot2 <- renderLeaflet({
@@ -327,4 +333,5 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
+
 ```
