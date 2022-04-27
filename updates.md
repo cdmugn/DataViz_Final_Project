@@ -61,4 +61,7 @@ Changed the cut offs in my color scale so they change more, right now most beers
 
 4/25: after-class
 Working on coloring the lollipops by the same scale as the leaflet - have them changing for style rating but the color scale does not match. Came up with a strategy to get this coloring accomplished.
+
+4/27: beginning of class
+Colored dots in lollipop chart to match the circles on the leaflet plot!! Changed theme and color so that everything looks good and matches. All done!
  
