@@ -66,5 +66,5 @@ Working on coloring the lollipops by the same scale as the leaflet - have them c
 Colored dots in lollipop chart to match the circles on the leaflet plot!! Changed theme and color so that everything looks good and matches. All done!
 
 4/27: after-class
-changed colors more to actually be able to see them all and added an overall theme so it looks more professional
+changed colors more to actually be able to see them all and added an overall theme so it looks more professional.
  

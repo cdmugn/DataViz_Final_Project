@@ -150,8 +150,6 @@ Want to put this plot into a new tab on the shiny app. Have to figure out how to
 
 - Changed theme and color so that everything looks good and matches
 
------------------
-
 - Changed colors again because I realized you can't see the NA's well on the plot
 
 - Changed name of color scale 
