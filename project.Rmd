@@ -13,8 +13,6 @@ Making a shiny app - working with data from a git hub repository data set, conve
 
 ```{r}
 library(tidyverse)
-library (readr)
-library(maps)
 library(leaflet)
 library(ggplot2)
 library(shinythemes)
@@ -22,7 +20,6 @@ library(shinythemes)
 rating_df <- read_csv("data/stylereview.csv")
 cities_df <- read_csv("data/uscities.csv")
 beer_df <- read_csv("data/beer.csv")
-state_df <- ggplot2::map_data("state")
 
 beer_city <- left_join(beer_df, cities_df, by = c("City" = "city")) %>% filter(State == state_id) %>% select(1:11, 17:19)
 
