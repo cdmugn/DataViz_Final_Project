@@ -1,0 +1,14 @@
+name: DataViz_Final_Project
+title: DataViz_Final_Project
+username:
+account: cdmugn18
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6476766
+bundleId: 6001150
+url: https://cdmugn18.shinyapps.io/DataViz_Final_Project/
+when: 1655078304.6313
+lastSyncTime: 1655078304.63131
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|classmate_projects.md|project_files/.DS_Store|project_files/figure-latex/unnamed-chunk-2-1.pdf|project.html|project.Rmd|README.md|updates.md|writeup.md
